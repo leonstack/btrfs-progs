@@ -46,6 +46,11 @@ int btrfs_device_already_in_root(struct btrfs_root *root, int fd,
 				 int super_offset);
 char *pretty_sizes(u64 size);
 int open_file_or_dir(const char *fname);
+int get_device_info(int fd, u64 devid,
+			struct btrfs_ioctl_dev_info_args *di_args);
+int get_fs_info(char *path,
+		struct btrfs_ioctl_fs_info_args *fi_args,
+		struct btrfs_ioctl_dev_info_args **di_ret);
 int check_label(char *input);
 int get_mountpt(char *dev, char *mntpt, size_t size);
 
