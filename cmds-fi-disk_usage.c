@@ -989,4 +989,144 @@ int cmd_filesystem_disk_usage(int argc, char **argv)
 	return 0;
 }
 
+static void print_disk_chunks(int fd,
+				u64 devid,
+				u64 total_size,
+				struct chunk_info *chunks_info_ptr,
+				int chunks_info_count,
+				int mode)
+{
+	int i;
+	u64 allocated = 0;
+	char *s;
+
+	for (i = 0 ; i < chunks_info_count ; i++) {
+		char *description = "";
+		char *r_mode;
+		u64 flags;
+
+		if (chunks_info_ptr[i].devid != devid)
+			continue;
+
+		flags = chunks_info_ptr[i].type;
+
+		btrfs_flags2description(flags, &description);
+		btrfs_flags2profile(flags, &r_mode);
+
+		s = df_pretty_sizes(chunks_info_ptr[i].size, mode);
+		printf("   %s,%s:%*s%10s\n",
+			description,
+			r_mode,
+			(int)(20 - strlen(description) - strlen(r_mode)), "",
+			s);
+
+		allocated += chunks_info_ptr[i].size;
+
+	}
+	s = df_pretty_sizes(total_size - allocated, mode);
+	printf("   Unallocated: %*s%10s\n",
+		(int)(20 - strlen("Unallocated")), "",
+		s);
+
+}
+
+static int _cmd_device_disk_usage(int fd, char *path, int mode)
+{
+	int i;
+	int ret = 0;
+	int info_count = 0;
+	struct chunk_info *info_ptr = 0;
+	struct disk_info *disks_info_ptr = 0;
+	int disks_info_count = 0;
+
+	if (load_chunk_info(fd, &info_ptr, &info_count) ||
+	    load_disks_info(fd, &disks_info_ptr, &disks_info_count)) {
+		ret = -1;
+		goto exit;
+	}
+
+	for (i = 0 ; i < disks_info_count ; i++) {
+		char *s;
+
+		s = df_pretty_sizes(disks_info_ptr[i].size, mode);
+		printf("%s\t%10s\n", disks_info_ptr[i].path, s);
+
+		print_disk_chunks(fd, disks_info_ptr[i].devid,
+				disks_info_ptr[i].size,
+				info_ptr, info_count,
+				mode);
+		printf("\n");
+
+	}
+
+
+exit:
+
+	free_strings_to_free();
+	if (disks_info_ptr)
+		free(disks_info_ptr);
+	if (info_ptr)
+		free(info_ptr);
+
+	return ret;
+}
+
+const char * const cmd_device_disk_usage_usage[] = {
+	"btrfs device disk-usage [-b] <path> [<path>..]",
+	"Show which chunks are in a device.",
+	"",
+	"-b\tSet byte as unit",
+	NULL
+};
+
+int cmd_device_disk_usage(int argc, char **argv)
+{
+
+	int	flags = DF_HUMAN_UNIT;
+	int	i, more_than_one = 0;
+
+	optind = 1;
+	while (1) {
+		char	c = getopt(argc, argv, "b");
+
+		if (c < 0)
+			break;
+
+		switch (c) {
+		case 'b':
+			flags &= ~DF_HUMAN_UNIT;
+			break;
+		default:
+			usage(cmd_device_disk_usage_usage);
+		}
+	}
+
+	if (check_argc_min(argc - optind, 1)) {
+		usage(cmd_device_disk_usage_usage);
+		return 21;
+	}
+
+	for (i = optind; i < argc ; i++) {
+		int r, fd;
+		if (more_than_one)
+			printf("\n");
+
+		fd = open_file_or_dir(argv[i]);
+		if (fd < 0) {
+			fprintf(stderr, "ERROR: can't access to '%s'\n",
+				argv[1]);
+			return 12;
+		}
+		r = _cmd_device_disk_usage(fd, argv[i], flags);
+		close(fd);
+
+		if (r)
+			return r;
+		more_than_one = 1;
+
+	}
+
+	return 0;
+}
+
 

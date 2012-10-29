@@ -27,6 +27,7 @@
 #include "ctree.h"
 #include "ioctl.h"
 #include "utils.h"
+#include "cmds-fi-disk_usage.h"
 
 #include "commands.h"
 
@@ -255,6 +256,8 @@ const struct cmd_group device_cmd_group = {
 		{ "add", cmd_add_dev, cmd_add_dev_usage, NULL, 0 },
 		{ "delete", cmd_rm_dev, cmd_rm_dev_usage, NULL, 0 },
 		{ "scan", cmd_scan_dev, cmd_scan_dev_usage, NULL, 0 },
+		{ "disk-usage", cmd_device_disk_usage,
+			cmd_device_disk_usage_usage, NULL, 0 },
 		{ 0, 0, 0, 0, 0 }
 	}
 };
