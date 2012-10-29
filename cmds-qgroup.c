@@ -22,6 +22,7 @@
 
 #include "ctree.h"
 #include "ioctl.h"
+#include "utils.h"
 
 #include "commands.h"
 

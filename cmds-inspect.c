@@ -21,6 +21,7 @@
 #include <errno.h>
 
 #include "kerncompat.h"
+#include "utils.h"
 #include "ioctl.h"
 
 #include "commands.h"

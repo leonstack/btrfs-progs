@@ -45,6 +45,7 @@ int check_mounted_where(int fd, const char *file, char *where, int size,
 int btrfs_device_already_in_root(struct btrfs_root *root, int fd,
 				 int super_offset);
 char *pretty_sizes(u64 size);
+int open_file_or_dir(const char *fname);
 int check_label(char *input);
 int get_mountpt(char *dev, char *mntpt, size_t size);
 
