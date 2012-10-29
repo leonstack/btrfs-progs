@@ -20,6 +20,7 @@
 #define __UTILS__
 
 #include <sys/stat.h>
+#include "kerncompat.h"
 #include "ctree.h"
 
 #define BTRFS_MKFS_SYSTEM_GROUP_SIZE (4 * 1024 * 1024)
@@ -66,5 +67,5 @@ u64 btrfs_device_size(int fd, struct stat *st);
 /* Helper to always get proper size of the destination string */
 #define strncpy_null(dest, src) __strncpy__null(dest, src, sizeof(dest))
 int test_dev_for_mkfs(char *file, int force_overwrite, char *estr);
-
+u64 disk_size(char *path);
 #endif
