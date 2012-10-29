@@ -56,4 +56,5 @@ int get_mountpt(char *dev, char *mntpt, size_t size);
 
 int btrfs_scan_block_devices(int run_ioctl);
 u64 disk_size(char *path);
+u64 get_partition_size(char *dev);
 #endif
