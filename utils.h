@@ -68,4 +68,5 @@ u64 btrfs_device_size(int fd, struct stat *st);
 #define strncpy_null(dest, src) __strncpy__null(dest, src, sizeof(dest))
 int test_dev_for_mkfs(char *file, int force_overwrite, char *estr);
 u64 disk_size(char *path);
+u64 get_partition_size(char *dev);
 #endif
