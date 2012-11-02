@@ -29,6 +29,9 @@ btrfs \- control a btrfs filesystem
 .PP
 \fBbtrfs\fP \fBfilesystem resize\fP\fI [devid:][+/\-]<size>[gkm]|[devid:]max <filesystem>\fP
 .PP
+\fBbtrfs\fP \fBfilesystem filesystem disk-usage [-t][-b]\fP\fI <path> 
+[path..]\fP
+.PP
 \fBbtrfs\fP \fBfilesystem label\fP\fI <dev> [newlabel]\fP
 .PP
 \fBbtrfs\fP \fBfilesystem show\fP\fI [--all-devices|<uuid>|<label>]\fP
@@ -265,6 +268,16 @@ partition after reducing the size of the filesystem.  This can done using
 \fBfdisk(8)\fR or \fBparted(8)\fR to delete the existing partition and recreate
 it with the new desired size.  When recreating the partition make sure to use
 the same starting disk cylinder as before.
+.TP
+
+\fBfilesystem disk-usage\fP [-t][-b] \fIpath [path..]\fR
+
+Show in which disk the chunks are allocated.
+
+\fB-b\fP Set byte as unit
+
+\fB-t\fP Show data in tabular format
+
 .TP
 
 \fBfilesystem label\fP\fI [<device>|<mountpoint>] [newlabel]\fP
