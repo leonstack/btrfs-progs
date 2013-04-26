@@ -2153,10 +2153,6 @@ int btrfs_check_leaf(struct btrfs_root *root,
 		      struct extent_buffer *buf);
 int btrfs_fsck_reinit_root(struct btrfs_trans_handle *trans,
 			   struct btrfs_root *root, int overwrite);
-void reada_for_search(struct btrfs_root *root, struct btrfs_path *path,
-			     int level, int slot, u64 objectid);
-struct extent_buffer *read_node_slot(struct btrfs_root *root,
-				   struct extent_buffer *parent, int slot);
 int btrfs_previous_item(struct btrfs_root *root,
 			struct btrfs_path *path, u64 min_objectid,
 			int type);

@@ -148,12 +148,9 @@ static int decompress(char *inbuf, char *outbuf, u64 compress_len,
 	return -1;
 }
 
-int next_leaf(struct btrfs_root *root, struct btrfs_path *path)
+static int next_leaf(struct btrfs_root *root, struct btrfs_path *path)
 {
-	int slot;
 	int level = 1;
-	struct extent_buffer *c;
-	struct extent_buffer *next = NULL;
 
 	for (; level < BTRFS_MAX_LEVEL; level++) {
 		if (path->nodes[level])
@@ -163,41 +160,7 @@ int next_leaf(struct btrfs_root *root, struct btrfs_path *path)
 	if (level == BTRFS_MAX_LEVEL)
 		return 1;
 
-	slot = path->slots[level] + 1;
-
-	while(level < BTRFS_MAX_LEVEL) {
-		if (!path->nodes[level])
-			return 1;
-
-		slot = path->slots[level] + 1;
-		c = path->nodes[level];
-		if (slot >= btrfs_header_nritems(c)) {
-			level++;
-			if (level == BTRFS_MAX_LEVEL)
-				return 1;
-			continue;
-		}
-
-		if (path->reada)
-			reada_for_search(root, path, level, slot, 0);
-
-		next = read_node_slot(root, c, slot);
-		break;
-	}
-	path->slots[level] = slot;
-	while(1) {
-		level--;
-		c = path->nodes[level];
-		free_extent_buffer(c);
-		path->nodes[level] = next;
-		path->slots[level] = 0;
-		if (!level)
-			break;
-		if (path->reada)
-			reada_for_search(root, path, level, 0, 0);
-		next = read_node_slot(root, next, 0);
-	}
-	return 0;
+	return btrfs_next_leaf(root, path);
 }
 
 static int copy_one_inline(int fd, struct btrfs_path *path, u64 pos)
