@@ -94,7 +94,7 @@ static struct btrfs_root *open_ctree_broken(int fd, const char *device)
 	struct btrfs_root *chunk_root = malloc(sizeof(struct btrfs_root));
 	struct btrfs_root *dev_root = malloc(sizeof(struct btrfs_root));
 	struct btrfs_root *csum_root = malloc(sizeof(struct btrfs_root));
-	struct btrfs_fs_info *fs_info = malloc(sizeof(*fs_info));
+	struct btrfs_fs_info *fs_info = calloc(1, sizeof(*fs_info));
 	int ret;
 	struct btrfs_super_block *disk_super;
 	struct btrfs_fs_devices *fs_devices = NULL;
@@ -115,7 +115,6 @@ static struct btrfs_root *open_ctree_broken(int fd, const char *device)
 			goto out;
 	}
 
-	memset(fs_info, 0, sizeof(*fs_info));
 	fs_info->super_copy = calloc(1, BTRFS_SUPER_INFO_SIZE);
 	fs_info->tree_root = tree_root;
 	fs_info->extent_root = extent_root;
@@ -228,6 +227,8 @@ out:
 	free(chunk_root);
 	free(dev_root);
 	free(csum_root);
+	if (fs_info)
+		free(fs_info->super_copy);
 	free(fs_info);
 	return NULL;
 }
