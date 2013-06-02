@@ -6133,7 +6133,7 @@ int cmd_check(int argc, char **argv)
 
 	while(1) {
 		int c;
-		c = getopt_long(argc, argv, "as:b", long_options,
+		c = getopt_long(argc, argv, "ahs:b", long_options,
 				&option_index);
 		if (c < 0)
 			break;
