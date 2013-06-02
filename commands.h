@@ -75,6 +75,8 @@ extern const char * const generic_cmd_help_usage[];
 void usage(const char * const *usagestr) __attribute__((noreturn));
 void usage_command(const struct cmd_struct *cmd, int full, int err);
 void usage_command_group(const struct cmd_group *grp, int all, int err);
+void usage_command_usagestr(const char * const *usagestr,
+				const char *token, int full, int err);
 
 void help_unknown_token(const char *arg, const struct cmd_group *grp) __attribute__((noreturn));
 void help_ambiguous_token(const char *arg, const struct cmd_group *grp) __attribute__((noreturn));

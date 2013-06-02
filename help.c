@@ -102,7 +102,7 @@ static int usage_command_internal(const char * const *usagestr,
 	return ret;
 }
 
-static void usage_command_usagestr(const char * const *usagestr,
+void usage_command_usagestr(const char * const *usagestr,
 				   const char *token, int full, int err)
 {
 	FILE *outf = err ? stderr : stdout;

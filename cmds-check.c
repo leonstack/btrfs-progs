@@ -6149,8 +6149,11 @@ int cmd_check(int argc, char **argv)
 				       (unsigned long long)bytenr);
 				break;
 			case '?':
-			case 'h':
 				usage(cmd_check_usage);
+				break;
+			case 'h':
+				usage_command_usagestr(cmd_check_usage, "check", 1, 0);
+				exit(0);
 		}
 		if (option_index == 1) {
 			printf("enabling repair mode\n");
