@@ -117,10 +117,9 @@ int insert_cache_extent(struct cache_tree *tree, u64 start, u64 size)
 struct cache_extent *find_cache_extent(struct cache_tree *tree,
 					   u64 start, u64 size)
 {
-	struct rb_node *prev;
 	struct rb_node *ret;
 	struct cache_extent *entry;
-	ret = __tree_search(&tree->root, start, size, &prev);
+	ret = __tree_search(&tree->root, start, size, NULL);
 	if (!ret)
 		return NULL;
 
