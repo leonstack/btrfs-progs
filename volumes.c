@@ -117,6 +117,7 @@ static int device_list_add(const char *path,
 			/* we can safely leave the fs_devices entry around */
 			return -ENOMEM;
 		}
+		device->fd = -1;
 		device->devid = devid;
 		memcpy(device->uuid, disk_super->dev_item.uuid,
 		       BTRFS_UUID_SIZE);
@@ -1621,10 +1622,10 @@ static int read_one_dev(struct btrfs_root *root,
 	if (!device) {
 		printk("warning devid %llu not found already\n",
 			(unsigned long long)devid);
-		device = kmalloc(sizeof(*device), GFP_NOFS);
+		device = kzalloc(sizeof(*device), GFP_NOFS);
 		if (!device)
 			return -ENOMEM;
-		device->total_ios = 0;
+		device->fd = -1;
 		list_add(&device->dev_list,
 			 &root->fs_info->fs_devices->devices);
 	}
