@@ -3280,12 +3280,14 @@ btrfs_add_block_group(struct btrfs_fs_info *fs_info, u64 bytes_used, u64 type,
 	BUG_ON(ret);
 
 	bit = block_group_state_bits(type);
-	set_extent_bits(block_group_cache, chunk_offset,
-			chunk_offset + size - 1,
-			bit | EXTENT_LOCKED, GFP_NOFS);
+	ret = set_extent_bits(block_group_cache, chunk_offset,
+			      chunk_offset + size - 1,
+			      bit | EXTENT_LOCKED, GFP_NOFS);
+	BUG_ON(ret);
 
-	set_state_private(block_group_cache, chunk_offset,
-			  (unsigned long)cache);
+	ret = set_state_private(block_group_cache, chunk_offset,
+				(unsigned long)cache);
+	BUG_ON(ret);
 	set_avail_alloc_bits(fs_info, type);
 
 	return cache;
