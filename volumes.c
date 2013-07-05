@@ -1731,8 +1731,13 @@ again:
 		}
 		btrfs_item_key_to_cpu(leaf, &found_key, slot);
 		if (key.objectid == BTRFS_DEV_ITEMS_OBJECTID) {
-			if (found_key.objectid != BTRFS_DEV_ITEMS_OBJECTID)
+			if (found_key.objectid != BTRFS_DEV_ITEMS_OBJECTID) {
+				if (found_key.type == BTRFS_CHUNK_ITEM_KEY) {
+					key.objectid = found_key.objectid;
+					continue;
+				}
 				break;
+			}
 			if (found_key.type == BTRFS_DEV_ITEM_KEY) {
 				struct btrfs_dev_item *dev_item;
 				dev_item = btrfs_item_ptr(leaf, slot,
@@ -1749,7 +1754,7 @@ again:
 		path->slots[0]++;
 	}
 	if (key.objectid == BTRFS_DEV_ITEMS_OBJECTID) {
-		key.objectid = 0;
+		key.objectid = BTRFS_FIRST_CHUNK_TREE_OBJECTID;
 		btrfs_release_path(root, path);
 		goto again;
 	}
