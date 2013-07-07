@@ -84,10 +84,12 @@ print_bg(FILE *html, char *name, u64 start, u64 len, u64 used, u64 flags,
 	 u64 areas)
 {
 	double frag = (double)areas / (len / 4096) * 2;
+	char str[MAX_PRETTY_LEN];
+	pretty_sizes(len, str);
 
 	fprintf(html, "<p>%s chunk starts at %lld, size is %s, %.2f%% used, "
 		      "%.2f%% fragmented</p>\n", chunk_type(flags), start,
-		      pretty_sizes(len), 100.0 * used / len, 100.0 * frag);
+		      str, 100.0 * used / len, 100.0 * frag);
 	fprintf(html, "<img src=\"%s\" border=\"1\" />\n", name);
 }
 

@@ -111,8 +111,8 @@ static int cmd_df(int argc, char **argv)
 
 	for (i = 0; i < sargs->total_spaces; i++) {
 		char description[80];
-		char *total_bytes;
-		char *used_bytes;
+		char total_bytes[MAX_PRETTY_LEN];
+		char used_bytes[MAX_PRETTY_LEN];
 		int written = 0;
 		u64 flags = sargs->spaces[i].flags;
 
@@ -155,8 +155,8 @@ static int cmd_df(int argc, char **argv)
 			written += 7;
 		}
 
-		total_bytes = pretty_sizes(sargs->spaces[i].total_bytes);
-		used_bytes = pretty_sizes(sargs->spaces[i].used_bytes);
+		pretty_sizes(sargs->spaces[i].total_bytes, total_bytes);
+		pretty_sizes(sargs->spaces[i].used_bytes, used_bytes);
 		printf("%s: total=%s, used=%s\n", description, total_bytes,
 		       used_bytes);
 	}
@@ -192,7 +192,7 @@ static void print_one_uuid(struct btrfs_fs_devices *fs_devices)
 	char uuidbuf[37];
 	struct list_head *cur;
 	struct btrfs_device *device;
-	char *super_bytes_used;
+	char super_bytes_used[MAX_PRETTY_LEN];
 	u64 devs_found = 0;
 	u64 total;
 
@@ -204,25 +204,21 @@ static void print_one_uuid(struct btrfs_fs_devices *fs_devices)
 	else
 		printf("Label: none ");
 
-	super_bytes_used = pretty_sizes(device->super_bytes_used);
+	pretty_sizes(device->super_bytes_used, super_bytes_used);
 
 	total = device->total_devs;
 	printf(" uuid: %s\n\tTotal devices %llu FS bytes used %s\n", uuidbuf,
 	       (unsigned long long)total, super_bytes_used);
 
-	free(super_bytes_used);
-
 	list_for_each(cur, &fs_devices->devices) {
-		char *total_bytes;
-		char *bytes_used;
+		char total_bytes[MAX_PRETTY_LEN];
+		char bytes_used[MAX_PRETTY_LEN];
 		device = list_entry(cur, struct btrfs_device, dev_list);
-		total_bytes = pretty_sizes(device->total_bytes);
-		bytes_used = pretty_sizes(device->bytes_used);
+		pretty_sizes(device->total_bytes, total_bytes);
+		pretty_sizes(device->bytes_used, bytes_used);
 		printf("\tdevid %4llu size %s used %s path %s\n",
 		       (unsigned long long)device->devid,
 		       total_bytes, bytes_used, device->name);
-		free(total_bytes);
-		free(bytes_used);
 		devs_found++;
 	}
 	if (devs_found < total) {

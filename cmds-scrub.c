@@ -139,7 +139,7 @@ static void print_scrub_summary(struct btrfs_scrub_progress *p)
 {
 	u64 err_cnt;
 	u64 err_cnt2;
-	char *bytes;
+	char bytes[MAX_PRETTY_LEN];
 
 	err_cnt = p->read_errors +
 			p->csum_errors +
@@ -151,10 +151,9 @@ static void print_scrub_summary(struct btrfs_scrub_progress *p)
 	if (p->malloc_errors)
 		printf("*** WARNING: memory allocation failed while scrubbing. "
 		       "results may be inaccurate\n");
-	bytes = pretty_sizes(p->data_bytes_scrubbed + p->tree_bytes_scrubbed);
+	pretty_sizes(p->data_bytes_scrubbed + p->tree_bytes_scrubbed, bytes);
 	printf("\ttotal bytes scrubbed: %s with %llu errors\n", bytes,
 		max(err_cnt, err_cnt2));
-	free(bytes);
 	if (err_cnt || err_cnt2) {
 		printf("\terror details:");
 		PRINT_SCRUB_ERROR(p->read_errors, "read");
