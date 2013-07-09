@@ -172,15 +172,14 @@ static void btrfs_flags2profile(u64 flags, char **profile)
 static char *df_pretty_sizes(u64 size, int mode)
 {
 	char *s;
+	int ret;
 
+	s = malloc(MAX_PRETTY_LEN);
 	if (mode & DF_HUMAN_UNIT) {
-		s = pretty_sizes(size);
-		if (!s)
+		ret = pretty_sizes(size, s);
+		if (!ret)
 			return NULL;
 	} else {
-		s = malloc(20);
-		if (!s)
-			return NULL;
 		sprintf(s, "%llu", size);
 	}
 
