@@ -1039,6 +1039,128 @@ out:
 	return !!ret;
 }
 
+static const char * const cmd_subvol_wait_usage[] = {
+	"btrfs subvolume wait <path> <subvol-id> [<subvol-id>...]",
+	"Wait until given subvolume(s) are completely cleaned",
+	"Wait until given subvolume(s) are completely cleaned after deletion.",
+	"",
+	"-s <N>       sleep N seconds between checks (default: 5)",
+	NULL
+};
+
+static int is_subvolume_cleaned(int fd, u64 min_id, u64 max_id)
+{
+	int ret;
+	struct btrfs_ioctl_search_args args;
+	struct btrfs_ioctl_search_key sk;
+	struct btrfs_ioctl_search_header sh;
+	unsigned long off = 0;
+
+	sk.tree_id = BTRFS_ROOT_TREE_OBJECTID;
+	sk.min_transid = 0;
+	sk.min_objectid = min_id;
+	sk.max_objectid = max_id;
+	sk.min_type = BTRFS_ROOT_REF_KEY;
+	sk.max_type = BTRFS_ROOT_REF_KEY;
+	sk.max_offset = (u64)-1;
+	sk.max_transid = (u64)-1;
+	sk.nr_items = 4096;
+}
+
+static int cmd_subvol_wait(int argc, char **argv)
+{
+	int fd = -1;
+	int i;
+	int ret;
+	DIR *dirstream = NULL;
+	u64 *ids = NULL;
+	u64 min_id = (u64)-1;
+	u64 max_id = 0;
+	int id_count;
+	int id_zombie;
+	int sleep_interval = 5;
+
+	optind = 1;
+	while (1) {
+		int c = getopt(argc, argv, "s:");
+
+		if (c < 0)
+			break;
+
+		switch (c) {
+		case 's':
+			sleep_interval = atoi(argv[optind]);
+			if (sleep_inteval < 1) {
+				fprintf("ERROR: invalid sleep interval %s\n"
+						argv[optind]);
+				ret = 1;
+				goto out;
+			break;
+		default:
+			usage(cmd_subvol_wait_usage);
+		}
+	}
+
+	if (check_argc_min(argc - optind, 2))
+		usage(cmd_subvol_wait_usage);
+
+	fd = open_file_or_dir(argv[optind], &dirstream);
+	if (fd < 0) {
+		fprintf(stderr, "ERROR: can't access to '%s'\n", argv[optind]);
+		goto out;
+	}
+	optind++;
+
+	id_count = argc - optind;
+	ids = (u64*)malloc(sizeof(u64) * id_count);
+
+	for (i = 0; i < id_count; i++) {
+		u64 id;
+		char *arg;
+
+		arg = argv[optind + i];
+		errno = 0;
+		id = strtoull(arg, NULL, 10);
+		if (errno < 0) {
+			fprintf(stderr, "ERROR: unrecognized subovlume id %s\n",
+				arg);
+			ret = 1;
+			goto out;
+		}
+		/* TODO: use defines */
+		if (id < 256 || id > (u64)-256) {
+			fprintf(stderr, "ERROR: subovlume id %s out of range\n",
+				arg);
+			ret = 1;
+			goto out;
+		}
+		ids[i] = id;
+		if (id < min_id)
+			min_id = id;
+		if (id > max_id)
+			max_id = id;
+	}
+
+	id_zombie = id_count;
+	while (id_zombie) {
+		for (i = 0; i < id_count; i++) {
+			/* TODO: use min and max */
+			if (ids[i] && is_subvol_cleaned(fd, ids[i], ids[i])) {
+				printf("Subvolume id %llu is gone\n", ids[i]);
+				ids[i] = 0;
+				id_zombie--;
+			}
+		}
+		sleep(sleep_interval);
+	}
+
+out:
+	free(ids);
+	close_file_or_dir(fd, dirstream);
+
+	return ret;
+}
+
 const struct cmd_group subvolume_cmd_group = {
 	subvolume_cmd_group_usage, NULL, {
 		{ "create", cmd_subvol_create, cmd_subvol_create_usage, NULL, 0 },
@@ -1051,6 +1173,7 @@ const struct cmd_group subvolume_cmd_group = {
 			cmd_subvol_set_default_usage, NULL, 0 },
 		{ "find-new", cmd_find_new, cmd_find_new_usage, NULL, 0 },
 		{ "show", cmd_subvol_show, cmd_subvol_show_usage, NULL, 0 },
+		{ "wait", cmd_subvol_wait, cmd_subvol_wait_usage, NULL, 0 },
 		NULL_CMD_STRUCT
 	}
 };
